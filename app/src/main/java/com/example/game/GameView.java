@@ -1,6 +1,5 @@
 package com.example.game;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -12,6 +11,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
     private GameThread gameThread;
     private Paint paint;
+    FpsCounter fpsCounter = new FpsCounter();
+    private Level level;
 
     public GameView(Context context) {
         super(context);
@@ -19,6 +20,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         paint = new Paint();
         paint.setColor(Color.RED);
         paint.setTextSize(50);
+
+        level = new Level(4, 4);
 
         gameThread = new GameThread(getHolder(), this);
         setFocusable(true);
@@ -50,7 +53,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     public void update() {
-
+        fpsCounter.update();
     }
 
     @Override
@@ -58,9 +61,9 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         super.draw(canvas);
         if (canvas != null) {
             canvas.drawColor(Color.BLACK);
-
-            canvas.drawText("Game Running", 100, 100, paint);
-            canvas.drawCircle(200, 300, 50, paint);
+            if (level.getCellSize() == 0) { level.setScreenDimensions(canvas.getWidth(), canvas.getHeight()); }
+            level.draw(canvas);
+            fpsCounter.draw(canvas);
         }
     }
 
@@ -95,12 +98,6 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                     if (canvas != null) {
                         surfaceHolder.unlockCanvasAndPost(canvas);
                     }
-                }
-
-                try {
-                    sleep(16); // ~60 FPS
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
             }
         }

@@ -1,0 +1,219 @@
+package com.example.game;
+
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RectF;
+import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Level {
+    //region screen vars
+    private int gridX;
+    private int gridY;
+    private int bombW;
+    private int bombH;
+    private int cellSize;
+    private int screenW;
+    private int screenH;
+    private int bombX;
+    private int bombY;
+    //endregion of screen vars
+    //region game vars
+    private int[][] cells;
+    private List<Module> modules;
+    //endregion of game vars
+    //region paint vars
+    private Paint bombPaint;
+    private Paint gridPaint;
+    private Paint moduleCellPaint;
+    //endregion of paint vars
+
+    public Level(int gridX, int gridY){
+        this.gridX = gridX;
+        this.gridY = gridY;
+        this.cells = new int[gridX][gridY];
+        this.modules = new ArrayList<>();
+        initializePaints();
+        createStandardModules();
+    }
+
+    private void createStandardModules() {
+        String[] moduleNames = {
+                "Питание", "Дисплей", "Кнопка", "Звук",
+                "Wi-Fi", "Bluetooth", "SIM", "Память",
+                "Камера", "Аккумулятор", "Сеть", "Датчики",
+                "NFC", "GPS", "Микрофон", "Динамик"
+        };
+
+        int index = 0;
+        for (int row = 0; row < gridY; row++) {
+            for (int col = 0; col < gridX; col++) {
+                if (index < moduleNames.length) {
+                    Module module = new Module(moduleNames[index], row, col);
+                    modules.add(module);
+                    index++;
+                }
+            }
+        }
+    }
+
+    //region logic
+
+    //endregion logic
+    //region draw
+    public void draw(Canvas canvas){
+        if (canvas == null) Log.d("myLog", "levelDraw: Could not load canvas!");
+        drawBomb(canvas);
+        drawModuleGrid(canvas);
+    }
+
+    public void drawBomb(Canvas canvas){
+        if (bombW <= 0 || bombH <= 0) Log.d("myLog", "drawBomb: no dimensions");
+        RectF bombRect = new RectF(bombX, bombY, bombX + bombW, bombY + bombH);
+
+        for (int i = 0; i < 5; i++) {
+            Paint layerPaint = new Paint();
+            int alpha = 100 - i * 20;
+            layerPaint.setColor(Color.argb(alpha, 60, 60, 60));
+            layerPaint.setStyle(Paint.Style.FILL);
+
+            RectF layerRect = new RectF(
+                    bombRect.left + i * 3,
+                    bombRect.top + i * 3,
+                    bombRect.right - i * 3,
+                    bombRect.bottom - i * 3
+            );
+            canvas.drawRoundRect(layerRect, 15, 15, layerPaint);
+        }
+
+        canvas.drawRoundRect(bombRect, 15, 15, bombPaint);
+
+        Paint borderPaint = new Paint();
+        borderPaint.setColor(Color.rgb(100, 100, 100));
+        borderPaint.setStyle(Paint.Style.STROKE);
+        borderPaint.setStrokeWidth(5);
+        borderPaint.setAntiAlias(true);
+        canvas.drawRoundRect(bombRect, 15, 15, borderPaint);
+    }
+    private void drawModuleGrid(Canvas canvas) {
+        if (bombW <= 0 || bombH <= 0) return;
+
+        int gridPadding = 40;
+        int gridAreaWidth = bombW - 2 * gridPadding;
+        int gridAreaHeight = bombH - 2 * gridPadding;
+        int cellWidth = gridAreaWidth / gridX;
+        int cellHeight = gridAreaHeight / gridY;
+        int gridStartX = bombX + (bombW - cellWidth * gridX) / 2;
+        int gridStartY = bombY + (bombH - cellHeight * gridY) / 2;
+
+        for (int row = 0; row < gridY; row++) {
+            for (int col = 0; col < gridX; col++) {
+                int cellX = gridStartX + col * cellWidth;
+                int cellY = gridStartY + row * cellHeight;
+                RectF cellRect = new RectF(cellX, cellY, cellX + cellWidth, cellY + cellHeight);
+                canvas.drawRect(cellRect, moduleCellPaint);
+                canvas.drawRect(cellRect, gridPaint);
+            }
+        }
+        drawModules(canvas, gridStartX, gridStartY, cellWidth, cellHeight);
+
+        Paint borderPaint = new Paint();
+        borderPaint.setColor(Color.rgb(150, 150, 150));
+        borderPaint.setStyle(Paint.Style.STROKE);
+        borderPaint.setStrokeWidth(3);
+    }
+    private void drawModules(Canvas canvas, int gridStartX, int gridStartY, int cellWidth, int cellHeight) {
+        for (Module module : modules) {
+            int row = module.getRow();
+            int col = module.getCol();
+
+            if (row < gridY && col < gridX) {
+                int cellX = gridStartX + col * cellWidth;
+                int cellY = gridStartY + row * cellHeight;
+                RectF cellRect = new RectF(cellX, cellY, cellX + cellWidth, cellY + cellHeight);
+
+                float modulePadding = 5f;
+                RectF moduleRect = new RectF(
+                        cellRect.left + modulePadding,
+                        cellRect.top + modulePadding,
+                        cellRect.right - modulePadding,
+                        cellRect.bottom - modulePadding
+                );
+
+                module.draw(canvas, moduleRect);
+            }
+        }
+    }
+    private void calculateBombDimensions() {
+        final float BOMB_ASPECT_RATIO = 16.0f / 9.0f;
+
+        int maxWidth = (int) (screenW * 0.85f);
+        int maxHeight = (int) (screenH * 0.90f);
+
+        float screenAspectRatio = (float) screenW / screenH;
+
+        if (screenAspectRatio > BOMB_ASPECT_RATIO) {
+            bombH = Math.min(maxHeight, (int) (maxWidth / BOMB_ASPECT_RATIO));
+            bombW = (int) (bombH * BOMB_ASPECT_RATIO);
+        } else {
+            bombW = Math.min(maxWidth, (int) (maxHeight * BOMB_ASPECT_RATIO));
+            bombH = (int) (bombW / BOMB_ASPECT_RATIO);
+        }
+        bombX = (screenW - bombW) / 2;
+        bombY = (screenH - bombH) / 2;
+
+        Log.d("myLog", String.format("Bomb: %dx%d at (%d,%d), Screen: %dx%d",
+                bombW, bombH, bombX, bombY, screenW, screenH));
+    }
+    public void setScreenDimensions(int screenW, int screenH) {
+        this.screenW = screenW;
+        this.screenH = screenH;
+
+        int padding = 50;
+        int availableWidth = screenW - 2 * padding;
+        int availableHeight = screenH - 2 * padding;
+
+        int cellWidth = availableWidth / gridX;
+        int cellHeight = availableHeight / gridY;
+        this.cellSize = Math.min(cellWidth, cellHeight);
+        calculateBombDimensions();
+    }
+    private void initializePaints() {
+        bombPaint = new Paint();
+        bombPaint.setColor(Color.rgb(40, 40, 40));
+        bombPaint.setStyle(Paint.Style.FILL);
+        bombPaint.setAntiAlias(true);
+
+        gridPaint = new Paint();
+        gridPaint.setColor(Color.rgb(80, 80, 80));
+        gridPaint.setStyle(Paint.Style.STROKE);
+        gridPaint.setStrokeWidth(2);
+        gridPaint.setAntiAlias(true);
+
+        moduleCellPaint = new Paint();
+        moduleCellPaint.setColor(Color.rgb(30, 30, 30)); // Темнее для контраста с модулями
+        moduleCellPaint.setStyle(Paint.Style.FILL);
+        moduleCellPaint.setAntiAlias(true);
+    }
+    //endregion draw
+    //region getters
+    public int getGridWidth() { return gridX; }
+    public int getGridHeight() { return gridY; }
+    public int getCellSize() { return cellSize; }
+
+    public Module getModuleAt(int row, int col) {
+        for (Module module : modules) {
+            if (module.getRow() == row && module.getCol() == col) {
+                return module;
+            }
+        }
+        return null;
+    }
+    public List<Module> getModules() {
+        return modules;
+    }
+    //endregion getters
+}
