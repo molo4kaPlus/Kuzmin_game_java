@@ -1,24 +1,31 @@
 package com.example.game;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 
 public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
     private GameThread gameThread;
     private Paint paint;
+    FpsCounter fpsCounter = new FpsCounter();
+    private Level level;
+    private boolean isPaused = false;
 
     public GameView(Context context) {
         super(context);
+        setLayerType(View.LAYER_TYPE_HARDWARE, null);
         getHolder().addCallback(this);
         paint = new Paint();
         paint.setColor(Color.RED);
         paint.setTextSize(50);
+
+        level = new Level(2, 2);
+        level.addModule("Timer",1,1,1L);
 
         gameThread = new GameThread(getHolder(), this);
         setFocusable(true);
@@ -26,8 +33,15 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        gameThread.setRunning(true);
-        gameThread.start();
+        if (gameThread == null) {
+            gameThread = new GameThread(getHolder(), this);
+            gameThread.setRunning(true);
+            gameThread.start();
+        } else {
+            gameThread.setRunning(true);
+        }
+        isPaused = false;
+        resumeAllTimers();
     }
 
     @Override
@@ -37,33 +51,40 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        boolean retry = true;
-        gameThread.setRunning(false);
-        while (retry) {
-            try {
-                gameThread.join();
-                retry = false;
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        pauseAllTimers();
+
+        if (gameThread != null) {
+            gameThread.setRunning(false);
+            boolean retry = true;
+            int attempts = 0;
+            while (retry && attempts < 10) {
+                try {
+                    gameThread.join(100);
+                    retry = false;
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                attempts++;
             }
+            gameThread = null;
         }
+        isPaused = true;
     }
 
     public void update() {
+        fpsCounter.update();
 
     }
-
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
         if (canvas != null) {
             canvas.drawColor(Color.BLACK);
-
-            canvas.drawText("Game Running", 100, 100, paint);
-            canvas.drawCircle(200, 300, 50, paint);
+            if (level.getCellSize() == 0) { level.setScreenDimensions(canvas.getWidth(), canvas.getHeight()); }
+            level.draw(canvas);
+            fpsCounter.draw(canvas);
         }
     }
-
     class GameThread extends Thread {
         private SurfaceHolder surfaceHolder;
         private GameView gameView;
@@ -96,12 +117,40 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                         surfaceHolder.unlockCanvasAndPost(canvas);
                     }
                 }
+            }
+        }
+    }
+    public void freeze() {
+        if (gameThread != null) {
+            gameThread.setRunning(false);
+        }
+        pauseAllTimers();
+        isPaused = true;
+    }
+    public void unfreeze() {
+        isPaused = false;
+        resumeAllTimers();
 
-                try {
-                    sleep(16); // ~60 FPS
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+        if (gameThread != null) {
+            gameThread.setRunning(true);
+            if (!gameThread.isAlive()) {
+                gameThread.start();
+            }
+        }
+    }
+    private void pauseAllTimers() {
+        for (Module module : level.getModules()) {
+            if (module instanceof ModuleTimer) {
+                ((ModuleTimer) module).pauseTimerForBackground();
+            }
+        }
+        SoundManager.getInstance().stopAllSounds();
+    }
+    private void resumeAllTimers() {
+        for (Module module : level.getModules()) {
+            if (module instanceof ModuleTimer) {
+                ((ModuleTimer) module).resumeTimerFromBackground();
+                ((ModuleTimer) module).enableSound(true);
             }
         }
     }
