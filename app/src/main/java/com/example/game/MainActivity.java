@@ -1,5 +1,6 @@
 package com.example.game;
 
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -7,7 +8,6 @@ import android.view.Window;
 import android.view.WindowManager;
 
 public class MainActivity extends AppCompatActivity {
-
     private GameView gameView;
 
     @Override
@@ -20,8 +20,12 @@ public class MainActivity extends AppCompatActivity {
 
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
+        initAssets();
+
         gameView = new GameView(this);
         setContentView(gameView);
     }
-
+    private void initAssets(){
+        FontManager.initialize(this);
+    }
 }

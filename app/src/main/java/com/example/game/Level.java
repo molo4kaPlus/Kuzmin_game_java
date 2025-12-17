@@ -41,27 +41,23 @@ public class Level {
     }
 
     private void createStandardModules() {
-        String[] moduleNames = {
-                "Питание", "Дисплей", "Кнопка", "Звук",
-                "Wi-Fi", "Bluetooth", "SIM", "Память",
-                "Камера", "Аккумулятор", "Сеть", "Датчики",
-                "NFC", "GPS", "Микрофон", "Динамик"
-        };
-
         int index = 0;
         for (int row = 0; row < gridY; row++) {
             for (int col = 0; col < gridX; col++) {
-                if (index < moduleNames.length) {
-                    Module module = new Module(moduleNames[index], row, col);
-                    modules.add(module);
-                    index++;
-                }
+                Module module = new Module(row, col);
+                modules.add(module);
             }
         }
     }
 
     //region logic
-
+    public void addModule(String type,int row, int col, Object... params) {
+        if (row >= 0 && row < gridY && col >= 0 && col < gridX) {
+            Module module = ModuleRegistry.createModule(type, row, col, params);
+            modules.removeIf(m -> m.getRow() == row && m.getCol() == col);
+            modules.add(module);
+        }
+    }
     //endregion logic
     //region draw
     public void draw(Canvas canvas){

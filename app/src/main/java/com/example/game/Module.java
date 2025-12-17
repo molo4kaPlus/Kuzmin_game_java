@@ -1,5 +1,6 @@
 package com.example.game;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -15,8 +16,8 @@ public class Module {
     private Paint textPaint;
     private Paint activePaint;
 
-    public Module(String name, int row, int col) {
-        this.name = name;
+    public Module(int row, int col) {
+        this.name = "NONE";
         this.row = row;
         this.col = col;
         this.isActive = false;
@@ -26,12 +27,12 @@ public class Module {
 
     private void initializePaints() {
         modulePaint = new Paint();
-        modulePaint.setColor(Color.rgb(50, 50, 50));
+        modulePaint.setColor(Color.rgb(60,60,60));
         modulePaint.setStyle(Paint.Style.FILL);
         modulePaint.setAntiAlias(true);
 
         activePaint = new Paint();
-        activePaint.setColor(Color.rgb(100, 150, 255));
+        activePaint.setColor(Color.rgb(50, 50, 50));
         activePaint.setStyle(Paint.Style.FILL);
         activePaint.setAntiAlias(true);
 
@@ -48,7 +49,7 @@ public class Module {
 
         if (name != null && !name.isEmpty()) {
             float textY = bounds.centerY() - ((textPaint.descent() + textPaint.ascent()) / 2);
-            canvas.drawText(name, bounds.centerX(), textY, textPaint);
+            //canvas.drawText(name, bounds.centerX(), textY, textPaint);
         }
     }
 
@@ -73,5 +74,8 @@ public class Module {
     public void setPosition(int row, int col) {
         this.row = row;
         this.col = col;
+    }
+    public Paint getActivePaint() {
+        return activePaint;
     }
 }

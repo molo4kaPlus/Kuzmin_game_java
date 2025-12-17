@@ -21,7 +21,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         paint.setColor(Color.RED);
         paint.setTextSize(50);
 
-        level = new Level(4, 4);
+        level = new Level(2, 2);
+        level.addModule("Timer",1,1,1L);
 
         gameThread = new GameThread(getHolder(), this);
         setFocusable(true);
@@ -54,6 +55,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
     public void update() {
         fpsCounter.update();
+
     }
 
     @Override
