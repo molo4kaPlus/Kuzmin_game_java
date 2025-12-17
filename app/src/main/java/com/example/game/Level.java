@@ -29,6 +29,7 @@ public class Level {
     private Paint bombPaint;
     private Paint gridPaint;
     private Paint moduleCellPaint;
+    private Paint borderPaint;
     //endregion of paint vars
 
     public Level(int gridX, int gridY){
@@ -70,11 +71,12 @@ public class Level {
         if (bombW <= 0 || bombH <= 0) Log.d("myLog", "drawBomb: no dimensions");
         RectF bombRect = new RectF(bombX, bombY, bombX + bombW, bombY + bombH);
 
+        Paint layerPaint = new Paint();
+        layerPaint.setStyle(Paint.Style.FILL);
+
         for (int i = 0; i < 5; i++) {
-            Paint layerPaint = new Paint();
             int alpha = 100 - i * 20;
             layerPaint.setColor(Color.argb(alpha, 60, 60, 60));
-            layerPaint.setStyle(Paint.Style.FILL);
 
             RectF layerRect = new RectF(
                     bombRect.left + i * 3,
@@ -86,12 +88,6 @@ public class Level {
         }
 
         canvas.drawRoundRect(bombRect, 15, 15, bombPaint);
-
-        Paint borderPaint = new Paint();
-        borderPaint.setColor(Color.rgb(100, 100, 100));
-        borderPaint.setStyle(Paint.Style.STROKE);
-        borderPaint.setStrokeWidth(5);
-        borderPaint.setAntiAlias(true);
         canvas.drawRoundRect(bombRect, 15, 15, borderPaint);
     }
     private void drawModuleGrid(Canvas canvas) {
@@ -193,6 +189,12 @@ public class Level {
         moduleCellPaint.setColor(Color.rgb(30, 30, 30)); // Темнее для контраста с модулями
         moduleCellPaint.setStyle(Paint.Style.FILL);
         moduleCellPaint.setAntiAlias(true);
+
+        borderPaint = new Paint();
+        borderPaint.setColor(Color.rgb(100, 100, 100));
+        borderPaint.setStyle(Paint.Style.STROKE);
+        borderPaint.setStrokeWidth(5);
+        borderPaint.setAntiAlias(true);
     }
     //endregion draw
     //region getters

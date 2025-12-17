@@ -18,14 +18,29 @@ public class MainActivity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
 
         initAssets();
 
         gameView = new GameView(this);
         setContentView(gameView);
     }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (gameView != null) {
+            gameView.freeze();
+        }
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (gameView != null) {
+            gameView.unfreeze();
+        }
+    }
     private void initAssets(){
         FontManager.initialize(this);
+        SoundManager.init(this);
     }
 }

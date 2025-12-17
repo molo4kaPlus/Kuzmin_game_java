@@ -10,6 +10,8 @@ import android.os.CountDownTimer;
 import android.util.Log;
 
 public class ModuleTimer extends Module {
+    private SoundManager soundManager;
+    private long lastDisplayedSeconds = -1;
     private long timeLeftInMillis;
     private long totalTimeMillis;
     private CountDownTimer countDownTimer;
@@ -20,6 +22,10 @@ public class ModuleTimer extends Module {
     private Paint serialPaint;
     private String[] timeChars = new String[5];
     private String serialNumber;
+    private long pauseTime = 0;
+    private boolean soundEnabled = true;
+    private long lastBeepTime = 0;
+    private static final long BEEP_INTERVAL = 1000;
 
     public ModuleTimer(int row, int col, long minutes) {
         super(row, col);
@@ -28,6 +34,7 @@ public class ModuleTimer extends Module {
         this.timeLeftInMillis = totalTimeMillis;
         this.isRunning = false;
         initializeTimerPaints();
+        soundManager = SoundManager.getInstance();
         this.serialNumber = generateSerialNumber();
         this.startTimer();
         Log.d("myLog", "ModuleTimer: added");
@@ -63,7 +70,7 @@ public class ModuleTimer extends Module {
         if (isRunning || countDownTimer != null) {
             return;
         }
-
+        updateTimeChars();
         setActive(true);
         isRunning = true;
 
@@ -71,7 +78,15 @@ public class ModuleTimer extends Module {
             @Override
             public void onTick(long millisUntilFinished) {
                 timeLeftInMillis = millisUntilFinished;
-                updateTimeChars();
+
+                long secondsLeft = millisUntilFinished / 1000;
+                if (secondsLeft != lastDisplayedSeconds) {
+                    lastDisplayedSeconds = secondsLeft;
+                    updateTimeChars();
+                }
+                if (soundEnabled && secondsLeft > 0 && secondsLeft <= 60) {
+                    playBeepSound(secondsLeft);
+                }
             }
 
             @Override
@@ -86,7 +101,7 @@ public class ModuleTimer extends Module {
     public void pauseTimer() {
         if (countDownTimer != null) {
             countDownTimer.cancel();
-            isRunning = false;
+            countDownTimer = null;
         }
     }
     public void resetTimer() {
@@ -104,7 +119,7 @@ public class ModuleTimer extends Module {
     }
     private void triggerTimerFinished() {
         Log.d("myLog", "triggerTimerFinished");
-     }
+    }
     @Override
     public void draw(Canvas canvas, RectF bounds) {
         super.draw(canvas, bounds);
@@ -122,14 +137,19 @@ public class ModuleTimer extends Module {
         );
         canvas.drawRect(displayRect, displayPaint);
         canvas.drawRect(displayRect, displayBorderPaint);
-        float totalTextWidth = timePaint.measureText("00:00");
+
+        float maxCharWidth = timePaint.measureText("8");
+
+        float totalTextWidth = maxCharWidth * 5;
+
         float startX = displayRect.left + (displayRect.width() - totalTextWidth) / 2;
         float textY = displayRect.centerY() - ((timePaint.descent() + timePaint.ascent()) / 2);
+
         float currentX = startX;
         for (int i = 0; i < 5; i++) {
-            float charWidth = timePaint.measureText(timeChars[i]);
-            canvas.drawText(timeChars[i], currentX + charWidth / 2, textY, timePaint);
-            currentX += charWidth;
+            float charX = currentX + (maxCharWidth / 2);
+            canvas.drawText(timeChars[i], charX, textY, timePaint);
+            currentX += maxCharWidth;
         }
 
         float serialX = bounds.right - 15;
@@ -139,7 +159,7 @@ public class ModuleTimer extends Module {
     private String formatTime(long millis) {
         long minutes = (millis / 1000) / 60;
         long seconds = (millis / 1000) % 60;
-
+        playBeepSound(getTimeLeftInMillis()/1000);
         return String.format("%02d:%02d", minutes, seconds);
     }
     public long getTimeLeftInMillis() {
@@ -159,11 +179,55 @@ public class ModuleTimer extends Module {
     }
     private void updateTimeChars() {
         String timeString = formatTime(timeLeftInMillis); // "MM:SS"
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 5 && i < timeString.length(); i++) {
             timeChars[i] = String.valueOf(timeString.charAt(i));
+        }
+    }
+    public void pauseTimerForBackground() {
+        if (isRunning && countDownTimer != null) {
+            countDownTimer.cancel();
+            countDownTimer = null;
+            pauseTime = System.currentTimeMillis();
+        }
+    }
+    public void resumeTimerFromBackground() {
+        if (pauseTime > 0) {
+            long timePassedInBackground = System.currentTimeMillis() - pauseTime;
+            timeLeftInMillis -= timePassedInBackground;
+
+            pauseTime = 0;
+
+            if (timeLeftInMillis <= 0) {
+                timeLeftInMillis = 0;
+                isRunning = false;
+                setActive(false);
+                triggerTimerFinished();
+            } else {
+                isRunning = false;
+                if (countDownTimer != null) {
+                    countDownTimer.cancel();
+                    countDownTimer = null;
+                }
+                startTimer();
+            }
         }
     }
     private String generateSerialNumber() {
         return "TM-" + System.currentTimeMillis() % 10000;
+    }
+    private void playBeepSound(long secondsLeft) {
+        if (soundManager != null) {
+            if (secondsLeft <= 60) {
+                soundManager.playSound(SoundManager.SOUND_TIMER_BEEP1, 1.0f);
+            } else {
+
+            }
+        }
+    }
+    public void enableSound(boolean enable) {
+        this.soundEnabled = enable;
+    }
+    public boolean isSoundEnabled() {
+        return soundEnabled;
     }
 }
