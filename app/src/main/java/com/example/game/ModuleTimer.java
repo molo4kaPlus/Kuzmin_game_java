@@ -142,9 +142,17 @@ public class ModuleTimer extends Module {
                     lastDisplayedSeconds = secondsLeft;
                     updateTimeChars();
                 }
-                if (soundEnabled && secondsLeft > 0 && secondsLeft <= 60) {
+                if (soundEnabled && secondsLeft > 0 && secondsLeft <= 150) {
                     playBeepSound(secondsLeft);
                 }
+                if (soundEnabled && secondsLeft == 0)
+                {
+                    playBoomSound(secondsLeft);
+                    }
+//                else if (soundEnabled && ) {  // бипка пердежа под луз
+//
+//                    }
+
             }
 
             @Override
@@ -345,6 +353,19 @@ public class ModuleTimer extends Module {
                     lastBeepTime = currentTime;
                     Log.d("myLog", "Beep at: " + secondsLeft + "s");
                 }
+            } else if (secondsLeft == 0) {
+                soundManager.playSound(SoundManager.SOUND_TIMER_BEEP1, 1.0f);
+
+            }
+        }
+    }
+
+    private void playBoomSound(long secondsLeft) {
+        if (soundManager != null && soundEnabled) {
+            long currentTime = System.currentTimeMillis();
+
+            if (secondsLeft == 0) {
+                soundManager.playSound(SoundManager.SOUND_TIMER_BOOM1, 1.0f);
             }
         }
     }

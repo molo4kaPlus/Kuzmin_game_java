@@ -160,6 +160,13 @@ public class GameManager {
             if (getBatteryCount() % 2 == 0){
                 shouldBeCut = true;
             }
+
+        }
+        else if (color == Color.BLACK) {
+            if (getBatteryCount() % 2 != 0){
+                shouldBeCut = true;
+            }
+
         }
 
         if (!shouldBeCut && wire.isCut() && !wire.checked){
@@ -173,11 +180,26 @@ public class GameManager {
         }
     }
     private void handleButton(ObjButton button){
+        int serialNumber = currentLevel.getSerial();
         boolean shouldBePressed = false;
+        boolean isCorrect = (button.isPressed() == shouldBePressed);
+        button.setSolved(isCorrect);
 
-        if (button.getColor() == Color.GREEN){
-            shouldBePressed = true;
+        Log.d("myLog", String.format("Serial: %d (%s), Color: %s, Pressed: %s, Should: %s, Correct: %s",
+                serialNumber,
+                serialNumber % 2 == 0 ? "EVEN" : "ODD",
+                        button.getColor(),
+                button.isPressed(),
+                shouldBePressed,
+                isCorrect));
+
+        if (serialNumber % 2 == 0) {
+            shouldBePressed = (button.getColor() == Color.BLUE); // четные
+        } else {
+            shouldBePressed = (button.getColor() == Color.RED); // нечетные
         }
+
+
 
         if (button.isPressed() && shouldBePressed){
             button.setSolved(true);
@@ -188,6 +210,8 @@ public class GameManager {
         } else if (!button.isPressed() && shouldBePressed) {
             button.setSolved(false);
         }
+
+
     }
     private void handleBattery(ObjBattery battery, Module module) {
         battery.setSolved(true);
