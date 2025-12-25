@@ -252,6 +252,7 @@ public class ModuleWords extends Module {
     @Override
     public void update() {
         super.update();
+
     }
     @Override
     public boolean isSolved() {
@@ -270,7 +271,7 @@ public class ModuleWords extends Module {
             if (wordList[ID] == unsortWordList[i]){
                 this.ID = i;
             }
-            Log.d("myLog", "the word is: " + wordList[ID]);
+            //Log.d("myLog", "the word is: " + wordList[ID]);
         }
     }
 }

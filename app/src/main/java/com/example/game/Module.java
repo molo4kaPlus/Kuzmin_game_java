@@ -86,23 +86,22 @@ public class Module {
 
         int index = 0;
 
-        // Проверяем, есть ли уже порт PS/2 в этом модуле
-        boolean hasPSHalf = false;
         for (Obj obj : objects) {
             if (obj instanceof ObjPSHalf) {
-                hasPSHalf = true;
+                hasPShalf = true;
                 break;
             }
         }
         // Добавляем порт PS/2 с вероятностью 50%, если его еще нет и есть свободные клетки
-        if (!hasPSHalf && freeCells.size() >= 1 && random.nextBoolean()) {
+        if (!hasPShalf && freeCells.size() >= 1 && random.nextBoolean()) {
+            hasPShalf = true;
             int[] pos = freeCells.get(index++);
             addObject(new ObjPSHalf(pos[0], pos[1]), pos[0], pos[1]);
             Log.d("myLog", "PS/2 Port added to (" + pos[0] + "," + pos[1] + ")");
-            numFree--; // Уменьшаем количество свободных клеток
+            numFree--;
             if (numFree == 0) return; // Если больше нет места, выходим
         }
-        boolean hasRJ45 = false;
+
         for (Obj obj : objects) {
             if (obj instanceof ObjRJ45) {
                 hasRJ45 = true;

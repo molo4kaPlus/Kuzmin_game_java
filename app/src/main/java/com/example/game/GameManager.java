@@ -121,6 +121,9 @@ public class GameManager {
                 handleTimerFinished(timer);
             }
         }
+        if (module instanceof  ModuleWords){
+            initWords();
+        }
         module.updateObjects();
     }
     private void handleTimerFinished(ModuleTimer timer) {
@@ -271,13 +274,14 @@ public class GameManager {
     private void initWords(){
         int ID;
         if(currentLevel.hasRJ45()){
-            ID = (currentLevel.getSerial() % 10) + 1;
-            Log.d("myLog", "has RJ45");
+            ID = (currentLevel.getSerial() % 10) - 1;
             ((ModuleWords)  currentLevel.getModuleAt(0,1)).setCorrectID(ID);
         } else if (currentLevel.hasPShalf()) {
-            Log.d("myLog", "has ps");
-            ID = (currentLevel.getSerial() % 10) + 1;
+            ID = (currentLevel.getSerial() % 10);
             ((ModuleWords)  currentLevel.getModuleAt(0,1)).setCorrectID(ID);
+        }
+        else {
+
         }
     }
     public void setGameEventListener(GameEventListener listener) {

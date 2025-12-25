@@ -331,7 +331,9 @@ public class ModuleTimer extends Module {
         }
     }
     private String generateSerialNumber() {
-        return "TM-" + System.currentTimeMillis() % 10000;
+        float temp = System.currentTimeMillis() % 10000;
+        serial = (int) temp;
+        return "TM-" + (int) temp;
     }
     private void playBeepSound(long secondsLeft) {
         if (soundManager != null && soundEnabled) {
