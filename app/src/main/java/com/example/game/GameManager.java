@@ -32,6 +32,7 @@ public class GameManager {
         void onTimerFinished(String moduleName);
         void onModuleActivated(String moduleName, boolean activated);
         void onObjectClicked(String objectType, int row, int col);
+        void onGameWon();
     }
     private GameManager(Context context) {
         this.context = context.getApplicationContext();
@@ -140,6 +141,10 @@ public class GameManager {
             if (obj instanceof ObjBattery) {
                 handleBattery((ObjBattery) obj, module);
             }
+
+            if (obj instanceof ObjButton) {
+                handleButton((ObjButton) obj);
+            }
             obj.update();
         }
     }
@@ -148,22 +153,41 @@ public class GameManager {
         int color = wire.getColor();
         if(color == Color.WHITE){
             shouldBeCut = true;
+        } else if (color == Color.GREEN) {
+            if (getBatteryCount() % 2 == 0){
+                shouldBeCut = true;
+            }
         }
 
         if (!shouldBeCut && wire.isCut() && !wire.checked){
             timer.addError();
             wire.checked = true;
+            wire.setSolved(true);
+        } else if (shouldBeCut && wire.isCut()) {
+            wire.setSolved(true);
+        } else if (shouldBeCut && !wire.isCut()) {
+            wire.setSolved(false);
+        }
+    }
+    private void handleButton(ObjButton button){
+        boolean shouldBePressed = false;
+
+        if (button.getColor() == Color.GREEN){
+            shouldBePressed = true;
+        }
+
+        if (button.isPressed() && shouldBePressed){
+            button.setSolved(true);
+        } else if (button.isPressed() && !shouldBePressed) {
+            button.setSolved(false);
+        } else if (!button.isPressed() && !shouldBePressed) {
+            button.setSolved(true);
+        } else if (!button.isPressed() && shouldBePressed) {
+            button.setSolved(false);
         }
     }
     private void handleBattery(ObjBattery battery, Module module) {
-        Log.d("GameManager", "Battery at module: " + module.getName() +
-                " type: " + battery.getBatteryType());
-        if (gameEventListener != null) {
-            gameEventListener.onObjectClicked("BATTERY",
-                    battery.getGridRow() + module.getRow() * 3,
-                    battery.getGridCol() + module.getCol() * 5
-            );
-        }
+        battery.setSolved(true);
     }
     private void checkGameConditions() {
         if (timer != null && timer.getErrorCount() >= 3) {
@@ -178,6 +202,9 @@ public class GameManager {
         boolean allModulesSolved = checkAllModulesSolved();
         if (allModulesSolved) {
             gameOver = true;
+            if (gameEventListener != null) {
+                gameEventListener.onGameWon();
+            }
             Log.d("GameManager", "Level completed!");
         }
     }
@@ -203,20 +230,11 @@ public class GameManager {
 
         List<Module> modules = currentLevel.getModules();
         for (Module module : modules) {
-
-            if (module instanceof ModuleTimer) {
-                ModuleTimer timer = (ModuleTimer) module;
-                if (timer.isRunning() || timer.getErrorCount() > 0) {
-                    return false;
-                }
+            if (!module.isSolved()) {
+                return false;
             }
-
         }
-
         return true;
-    }
-    public void addErrorToGame() {
-
     }
     private void pauseAllTimers() {
         if (currentLevel == null) return;
@@ -243,35 +261,11 @@ public class GameManager {
 
         return currentLevel.handleTouch(x, y);
     }
-    public Level getCurrentLevel() {
-        return currentLevel;
-    }
     public void setCurrentLevel(Level level) {
         this.currentLevel = level;
     }
-    public int getLives() {
-        return lives;
-    }
-    public void setLives(int lives) {
-        this.lives = lives;
-        if (gameEventListener != null) {
-            gameEventListener.onLivesChanged(lives);
-        }
-    }
-    public boolean isGameOver() {
-        return gameOver;
-    }
-    public void setGameOver(boolean gameOver) {
-        this.gameOver = gameOver;
-    }
-    public boolean isGamePaused() {
-        return gamePaused;
-    }
     public void setGameEventListener(GameEventListener listener) {
         this.gameEventListener = listener;
-    }
-    public void removeGameEventListener() {
-        this.gameEventListener = null;
     }
     public void cleanup() {
         stopGame();
@@ -289,6 +283,11 @@ public class GameManager {
                     ((ModuleTimer) module).resetTimer();
                     ((ModuleTimer) module).resetErrors();
                     ((ModuleTimer) module).addRandomObjects();
+                }
+                if (module instanceof ModuleWords) {
+                    ((ModuleWords) module).reset();
+                    ((ModuleWords) module).clearObjects();
+                    ((ModuleWords) module).addRandomObjects();
                 }
 
                 for (Obj obj : module.getObjects()) {

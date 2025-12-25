@@ -16,8 +16,7 @@ public class ObjWire extends Obj {
     private Paint paddingPaint;
     private boolean isCut = false;
     private int wireColor;
-    private int orientation; // 0: диагональ \, 1: диагональ /, 2: горизонталь, 3: вертикаль
-
+    private int orientation;
     public boolean checked = false;
 
     private static final int[] WIRE_COLORS = {

@@ -15,6 +15,7 @@ public class ObjBattery extends Obj {
 
     public ObjBattery() {
         super();
+        setSolved(true);
         initializePaints();
         loadSprite();
     }

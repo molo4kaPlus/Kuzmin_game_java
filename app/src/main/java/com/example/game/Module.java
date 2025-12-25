@@ -10,6 +10,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 public class Module {
     private String name;
@@ -29,12 +30,13 @@ public class Module {
     private Paint emptyCellPaint;
     private Paint objPaint;
     private List<Obj> objects;
+    private static final Random random = new Random();
 
     public Module(int row, int col) {
         this.name = "NONE";
         this.row = row;
         this.col = col;
-        this.isActive = false;
+        this.isActive = true;
         occupancyGrid = new int[gridRows][gridCols];
         for (int i = 0; i < gridRows; i++) {
             for (int j = 0; j < gridCols; j++) {
@@ -42,10 +44,17 @@ public class Module {
             }
         }
         this.objects = new ArrayList<>();
+
         initializePaints();
     }
 
-    public void addRandomObjects() {
+    /**
+     * Добавляет случайное количество интерактивных объектов (провода и кнопки),
+     * но не меньше указанного минимума. Остальные свободные клетки заполняются батарейками.
+     *
+     * @param minInteractiveObjects минимальное количество интерактивных объектов (минимум 1)
+     */
+    public void addRandomObjects(int minInteractiveObjects) {
         List<int[]> freeCells = new ArrayList<>();
         for (int r = 0; r < gridRows; r++) {
             for (int c = 0; c < gridCols; c++) {
@@ -55,23 +64,78 @@ public class Module {
             }
         }
 
-        if (freeCells.size() >= 4) {
-            Collections.shuffle(freeCells);
-
-            for (int i = 0; i < 4; i++) {
-                int[] pos = freeCells.get(i);
-                addObject(new ObjWire(), pos[0], pos[1]);
-                Log.d("myLog", "Wire added to cell (" + pos[0] + "," + pos[1] + ")");
-            }
-
-            for (int i = 4; i < freeCells.size(); i++) {
-                int[] pos = freeCells.get(i);
-                addObject(new ObjBattery(pos[0], pos[1], "AA"), pos[0], pos[1]);
-                Log.d("myLog", "Battery added to cell (" + pos[0] + "," + pos[1] + ")");
-            }
-        } else {
-            Log.w("myLog", "Not enough free cells for 3 wires!");
+        int numFree = freeCells.size();
+        if (numFree == 0) {
+            Log.w("myLog", "No free cells to place objects!");
+            return;
         }
+
+        int min = Math.max(1, minInteractiveObjects);
+        int max = numFree;
+        int numInteractive = min + random.nextInt(Math.max(0, max - min + 1));
+
+        if (numFree < min) {
+            numInteractive = numFree;
+        }
+
+        Collections.shuffle(freeCells);
+
+        int index = 0;
+
+        // Проверяем, есть ли уже порт PS/2 в этом модуле
+        boolean hasPSHalf = false;
+        for (Obj obj : objects) {
+            if (obj instanceof ObjPSHalf) {
+                hasPSHalf = true;
+                break;
+            }
+        }
+        // Добавляем порт PS/2 с вероятностью 50%, если его еще нет и есть свободные клетки
+        if (!hasPSHalf && freeCells.size() >= 1 && random.nextBoolean()) {
+            int[] pos = freeCells.get(index++);
+            addObject(new ObjPSHalf(pos[0], pos[1]), pos[0], pos[1]);
+            Log.d("myLog", "PS/2 Port added to (" + pos[0] + "," + pos[1] + ")");
+            numFree--; // Уменьшаем количество свободных клеток
+            if (numFree == 0) return; // Если больше нет места, выходим
+        }
+        boolean hasRJ45 = false;
+        for (Obj obj : objects) {
+            if (obj instanceof ObjRJ45) {
+                hasRJ45 = true;
+                break;
+            }
+        }
+        if (!hasRJ45 && freeCells.size() >= 1 && random.nextBoolean()) {
+            int[] pos = freeCells.get(index++);
+            addObject(new ObjRJ45(pos[0], pos[1]), pos[0], pos[1]);
+            Log.d("myLog", "RJ45 Port added to (" + pos[0] + "," + pos[1] + ")");
+            numFree--;
+            if (numFree == 0) return;
+        }
+        // Добавляем интерактивные объекты
+        for (int i = 0; i < numInteractive && index < freeCells.size(); i++) {
+            int[] pos = freeCells.get(index++);
+            if (i % 2 == 0) {
+                // Чётные — провода
+                addObject(new ObjWire(), pos[0], pos[1]);
+                Log.d("myLog", "Interactive Wire added to (" + pos[0] + "," + pos[1] + ")");
+            } else {
+                // Нечётные — кнопки
+                addObject(new ObjButton(pos[0], pos[1]), pos[0], pos[1]);
+                Log.d("myLog", "Interactive Button added to (" + pos[0] + "," + pos[1] + ")");
+            }
+        }
+
+        // Добавляем батарейки в оставшиеся клетки
+        for (int i = index; i < freeCells.size(); i++) {
+            int[] pos = freeCells.get(i);
+            addObject(new ObjBattery(pos[0], pos[1]), pos[0], pos[1]);
+            Log.d("myLog", "Static Battery added to (" + pos[0] + "," + pos[1] + ")");
+        }
+    }
+
+    public void addRandomObjects() {
+        addRandomObjects(6);
     }
     private void initializePaints() {
         modulePaint = new Paint();
@@ -380,5 +444,11 @@ public class Module {
     }
     public void update() {
         updateObjects();
+    }
+    public boolean isSolved(){
+        for (Obj obj : objects){
+            if (!obj.solved) { return false; }
+        }
+        return true;
     }
 }

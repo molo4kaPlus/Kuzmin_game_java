@@ -107,7 +107,14 @@ public class MainActivity extends AppCompatActivity
     public void onObjectClicked(String objectType, int row, int col) {
         // Обработать клик на объекте
     }
-
+    @Override
+    public void onGameWon() {
+        runOnUiThread(() -> {
+            if (gameView != null) {
+                gameView.setGameWon(true);
+            }
+        });
+    }
     private void initAssets(){
         FontManager.initialize(this);
         SoundManager.init(this);

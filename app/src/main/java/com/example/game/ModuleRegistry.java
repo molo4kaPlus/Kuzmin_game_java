@@ -9,6 +9,7 @@ public class ModuleRegistry {
     static {
         registerModule("NONE", Module.class);
         registerModule("Timer", ModuleTimer.class);
+        registerModule("WordDisplay", ModuleWords.class);
     }
 
     public static void registerModule(String type, Class<? extends Module> moduleClass) {
@@ -27,6 +28,9 @@ public class ModuleRegistry {
             }
             if (type.equals("Timer")) {
                 return new ModuleTimer(row, col, (Long) params[0]);
+            }
+            if (type.equals("WordDisplay")) {
+                return new ModuleWords(row, col, (int) params[0]);
             }
             return moduleClass.getConstructor(int.class, int.class)
                     .newInstance(row, col);

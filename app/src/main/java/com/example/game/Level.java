@@ -209,7 +209,6 @@ public class Level {
         Log.d("myLog", String.format("Bomb: %dx%d at (%d,%d), Screen: %dx%d",
                 bombW, bombH, bombX, bombY, screenW, screenH));
 
-        // Сбрасываем кэш при изменении размеров
         if (cachedBombBitmap != null) {
             cachedBombBitmap.recycle();
             cachedBombBitmap = null;
@@ -295,6 +294,18 @@ public class Level {
     }
     public List<Module> getModules() {
         return modules;
+    }
+    public float getTimeLeft(){
+        float time = 0;
+        for (Module module : modules) {
+            if (module instanceof Module) {
+                if (module.getName() == "Timer"){
+                    time = ((ModuleTimer) module).getTimeLeft();
+                    time = time / 1000f;
+                }
+            }
+        }
+        return time;
     }
     //endregion getters
 }

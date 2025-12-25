@@ -368,4 +368,7 @@ public class ModuleTimer extends Module {
     public boolean isMaxErrorsReached() {
         return errorCount >= MAX_ERRORS;
     }
+    public float getTimeLeft(){
+        return timeLeftInMillis;
+    }
 }

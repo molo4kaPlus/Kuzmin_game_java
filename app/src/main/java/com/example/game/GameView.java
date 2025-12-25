@@ -22,6 +22,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     private GameManager gameManager;
 
     private boolean gameOver = false;
+    private boolean gameWon = false;
     private Paint gameOverPaint;
     private Paint gameOverTextPaint;
     private Paint gameOverSubTextPaint;
@@ -29,6 +30,9 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     private Paint restartButtonPaint;
     private Paint restartButtonTextPaint;
     private Paint restartButtonPressedPaint;
+    private Paint gameWonPaint;
+    private Paint gameWonTextPaint;
+    private Paint gameWonSubTextPaint;
     private boolean restartButtonPressed = false;
 
     public GameView(Context context) {
@@ -41,6 +45,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
         level = new Level(2, 1);
         level.addModule("Timer",0,0,1L);
+        level.addModule("WordDisplay", 0, 1, 1);
 
         GameManager.init(context);
         gameManager = GameManager.getInstance();
@@ -52,24 +57,24 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         initPaints();
     }
     @Override
-    public boolean onTouchEvent(android.view.MotionEvent event) {
+    public boolean onTouchEvent(MotionEvent event) {
         float x = event.getX();
         float y = event.getY();
 
-        if (gameOver) {
+        if (gameOver || gameWon) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     if (restartButtonRect.contains(x, y)) {
                         restartButtonPressed = true;
-                        invalidate(); // Перерисовать с нажатой кнопкой
+                        invalidate();
                     }
                     break;
 
                 case MotionEvent.ACTION_UP:
                     if (restartButtonPressed && restartButtonRect.contains(x, y)) {
                         restartButtonPressed = false;
-                        invalidate();
                         restartGame();
+                        invalidate();
                     } else {
                         restartButtonPressed = false;
                         invalidate();
@@ -77,7 +82,6 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                     break;
 
                 case MotionEvent.ACTION_MOVE:
-                    // Опционально: менять состояние при движении пальца
                     boolean nowInside = restartButtonRect.contains(x, y);
                     if (restartButtonPressed != nowInside) {
                         restartButtonPressed = nowInside;
@@ -93,7 +97,6 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             return true;
         }
 
-        // Обычная обработка тача по модулям (если не game over)
         boolean handled = gameManager.handleTouch(x, y);
         if (handled) {
             invalidate();
@@ -149,27 +152,21 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
             float centerX = canvas.getWidth() / 2f;
             float centerY = canvas.getHeight() / 2f - 100;
-
             canvas.drawText("BOOM!", centerX, centerY, gameOverTextPaint);
             canvas.drawText("Игра окончена", centerX, centerY + 120, gameOverSubTextPaint);
             canvas.drawText("3 ошибки", centerX, centerY + 200, gameOverSubTextPaint);
 
-            float buttonWidth = canvas.getWidth() * 0.6f;
-            float buttonHeight = 140;
-            float buttonY = centerY + 350;
+            drawRestartButton(canvas, centerX, centerY + 350);
+        } else if (gameWon) {
+            canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), gameWonPaint);
 
-            restartButtonRect.set(
-                    centerX - buttonWidth / 2,
-                    buttonY - buttonHeight / 2,
-                    centerX + buttonWidth / 2,
-                    buttonY + buttonHeight / 2
-            );
+            float centerX = canvas.getWidth() / 2f;
+            float centerY = canvas.getHeight() / 2f - 100;
+            canvas.drawText("Победа!", centerX, centerY, gameWonTextPaint);
+            canvas.drawText("Все модули обезврежены", centerX, centerY + 120, gameWonSubTextPaint);
+            canvas.drawText("Оставшееся время: " + String.valueOf(level.getTimeLeft()), centerX, centerY + 240, gameOverSubTextPaint);
 
-            Paint buttonPaint = restartButtonPressed ? restartButtonPressedPaint : restartButtonPaint;
-            canvas.drawRoundRect(restartButtonRect, 30, 30, buttonPaint);
-
-            float textY = buttonY - (restartButtonTextPaint.descent() + restartButtonTextPaint.ascent()) / 2;
-            canvas.drawText("Начать заново", centerX, textY, restartButtonTextPaint);
+            drawRestartButton(canvas, centerX, centerY + 350);
         }
         else{
             super.draw(canvas);
@@ -182,6 +179,23 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                 fpsCounter.draw(canvas);
             }
         }
+    }
+    private void drawRestartButton(Canvas canvas, float centerX, float buttonY) {
+        float buttonWidth = canvas.getWidth() * 0.6f;
+        float buttonHeight = 140;
+
+        restartButtonRect.set(
+                centerX - buttonWidth / 2,
+                buttonY - buttonHeight / 2,
+                centerX + buttonWidth / 2,
+                buttonY + buttonHeight / 2
+        );
+
+        Paint buttonPaint = restartButtonPressed ? restartButtonPressedPaint : restartButtonPaint;
+        canvas.drawRoundRect(restartButtonRect, 30, 30, buttonPaint);
+
+        float textY = buttonY - (restartButtonTextPaint.descent() + restartButtonTextPaint.ascent()) / 2;
+        canvas.drawText("Начать заново", centerX, textY, restartButtonTextPaint);
     }
     class GameThread extends Thread {
         private SurfaceHolder surfaceHolder;
@@ -276,12 +290,12 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
         // Кнопка "Начать заново"
         restartButtonPaint = new Paint();
-        restartButtonPaint.setColor(Color.rgb(0, 100, 0)); // Тёмно-зелёный
+        restartButtonPaint.setColor(Color.rgb(0.2f, 0.2f, 0.2f)); // Тёмно-зелёный
         restartButtonPaint.setStyle(Paint.Style.FILL);
         restartButtonPaint.setAntiAlias(true);
 
         restartButtonPressedPaint = new Paint();
-        restartButtonPressedPaint.setColor(Color.rgb(0, 150, 0)); // Ярче при нажатии
+        restartButtonPressedPaint.setColor(Color.rgb(200, 200, 200)); // Ярче при нажатии
         restartButtonPressedPaint.setStyle(Paint.Style.FILL);
         restartButtonPressedPaint.setAntiAlias(true);
 
@@ -293,10 +307,36 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         restartButtonTextPaint.setTypeface(Typeface.create(Typeface.MONOSPACE, Typeface.BOLD));
 
         restartButtonRect = new RectF();
+
+        // Экран победы
+        gameWonPaint = new Paint();
+        gameWonPaint.setColor(Color.argb(180, 0, 100, 0)); // Полупрозрачный зелёный
+        gameWonPaint.setStyle(Paint.Style.FILL);
+
+        gameWonTextPaint = new Paint();
+        gameWonTextPaint.setColor(Color.WHITE);
+        gameWonTextPaint.setTextSize(150);
+        gameWonTextPaint.setTextAlign(Paint.Align.CENTER);
+        gameWonTextPaint.setAntiAlias(true);
+        gameWonTextPaint.setTypeface(Typeface.create(Typeface.MONOSPACE, Typeface.BOLD));
+
+        gameWonSubTextPaint = new Paint();
+        gameWonSubTextPaint.setColor(Color.WHITE);
+        gameWonSubTextPaint.setTextSize(60);
+        gameWonSubTextPaint.setTextAlign(Paint.Align.CENTER);
+        gameWonSubTextPaint.setAntiAlias(true);
     }
     private void restartGame() {
         gameOver = false;
+        this.gameWon = false;
         restartButtonPressed = false;
         gameManager.resetGame();
+    }
+    public void setGameWon(boolean won) {
+        this.gameWon = won;
+        this.gameOver = false;
+        if (won) {
+            pauseAllTimers();
+        }
     }
 }

@@ -9,6 +9,7 @@ public abstract class Obj {
     protected int gridCol;
     protected float rotation = 0;
     protected boolean isActive = false;
+    protected boolean solved = true;
     public Obj() {
         this.gridRow = 0;
         this.gridCol = 0;
@@ -19,12 +20,10 @@ public abstract class Obj {
     }
     public abstract void draw(Canvas canvas, RectF bounds);
     public void update() {
-        // Базовая реализация пустая
-        // Переопределить в дочерних классах при необходимости
+
     }
     public void onClick() {
-        // Базовая реализация пустая
-        // Переопределить в дочерних классах при необходимости
+
     }
     public int getGridRow() {
         return gridRow;
@@ -63,4 +62,10 @@ public abstract class Obj {
     }
 
     public abstract String getType();
+    public boolean isSolved(){
+        return solved;
+    }
+    public void setSolved (boolean set){
+        solved = set;
+    }
 }

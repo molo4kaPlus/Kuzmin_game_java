@@ -16,6 +16,8 @@ public class SpriteManager {
     public static final String SPRITE_BATTERY = "battery";
     public static final String SPRITE_WIRE = "wire";
     public static final String SPRITE_BUTTON = "button";
+    public static final String SPRITE_PSHALF = "ps_half";
+    public static final String SPRITE_RJ45 = "RJ45";
     // Добавьте другие спрайты по мере необходимости
 
     private SpriteManager(Context context) {
@@ -49,6 +51,8 @@ public class SpriteManager {
             loadSprite(SPRITE_BATTERY, "sprites/battery.png");
             loadSprite(SPRITE_WIRE, "sprites/wire.png");
             loadSprite(SPRITE_BUTTON, "sprites/button.png");
+            loadSprite(SPRITE_PSHALF, "sprites/psHalf.png");
+            loadSprite(SPRITE_RJ45, "sprites/RJ45.png");
 
             Log.d("myLog", "All sprites loaded successfully");
         } catch (Exception e) {
