@@ -1,5 +1,6 @@
 package com.example.game;
 
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -24,12 +25,17 @@ public class Level {
     //region game vars
     private int[][] cells;
     private List<Module> modules;
+    private boolean bombNeedsRedraw = true;
+    private Bitmap cachedBombBitmap;
     //endregion of game vars
     //region paint vars
     private Paint bombPaint;
     private Paint gridPaint;
     private Paint moduleCellPaint;
     private Paint borderPaint;
+    Paint layerPaint = new Paint();
+    private RectF cachedBombRect;
+    private RectF[] cachedLayerRects;
     //endregion of paint vars
 
     public Level(int gridX, int gridY){
@@ -50,7 +56,6 @@ public class Level {
             }
         }
     }
-
     //region logic
     public void addModule(String type,int row, int col, Object... params) {
         if (row >= 0 && row < gridY && col >= 0 && col < gridX) {
@@ -59,25 +64,47 @@ public class Level {
             modules.add(module);
         }
     }
+
     //endregion logic
     //region draw
     public void draw(Canvas canvas){
-        if (canvas == null) Log.d("myLog", "levelDraw: Could not load canvas!");
-        drawBomb(canvas);
-        drawModuleGrid(canvas);
+        if (canvas == null) {
+            Log.d("myLog", "levelDraw: Could not load canvas!");
+            return;
+        }
+        if (bombNeedsRedraw) {
+            updateBombBitmap(canvas);
+            bombNeedsRedraw = false;
+        }
+        if (cachedBombBitmap != null) {
+            canvas.drawBitmap(cachedBombBitmap, bombX, bombY, null);
+        }
+        drawModulesOnTop(canvas);
     }
+    private void updateBombBitmap(Canvas canvas) {
+        if (cachedBombBitmap != null) {
+            cachedBombBitmap.recycle();
+        }
+        if (bombW > 0 && bombH > 0) {
+            try {
+                cachedBombBitmap = Bitmap.createBitmap(bombW, bombH, Bitmap.Config.ARGB_8888);
+                Canvas bombCanvas = new Canvas(cachedBombBitmap);
 
-    public void drawBomb(Canvas canvas){
-        if (bombW <= 0 || bombH <= 0) Log.d("myLog", "drawBomb: no dimensions");
-        RectF bombRect = new RectF(bombX, bombY, bombX + bombW, bombY + bombH);
-
-        Paint layerPaint = new Paint();
-        layerPaint.setStyle(Paint.Style.FILL);
-
+                // Рисуем бомбу на отдельном канвасе
+                drawBombToBitmap(bombCanvas);
+            } catch (Exception e) {
+                Log.e("myLog", "Error creating bomb bitmap: " + e.getMessage());
+                cachedBombBitmap = null;
+            }
+        }
+    }
+    private void drawBombToBitmap(Canvas canvas) {
+        if (canvas == null || bombW <= 0 || bombH <= 0) {
+            return;
+        }
+        canvas.drawColor(Color.TRANSPARENT);
+        RectF bombRect = new RectF(0, 0, bombW, bombH);
         for (int i = 0; i < 5; i++) {
-            int alpha = 100 - i * 20;
-            layerPaint.setColor(Color.argb(alpha, 60, 60, 60));
-
             RectF layerRect = new RectF(
                     bombRect.left + i * 3,
                     bombRect.top + i * 3,
@@ -89,8 +116,10 @@ public class Level {
 
         canvas.drawRoundRect(bombRect, 15, 15, bombPaint);
         canvas.drawRoundRect(bombRect, 15, 15, borderPaint);
+
+        drawModuleGridToBitmap(canvas);
     }
-    private void drawModuleGrid(Canvas canvas) {
+    private void drawModuleGridToBitmap(Canvas canvas) {
         if (bombW <= 0 || bombH <= 0) return;
 
         int gridPadding = 40;
@@ -98,8 +127,8 @@ public class Level {
         int gridAreaHeight = bombH - 2 * gridPadding;
         int cellWidth = gridAreaWidth / gridX;
         int cellHeight = gridAreaHeight / gridY;
-        int gridStartX = bombX + (bombW - cellWidth * gridX) / 2;
-        int gridStartY = bombY + (bombH - cellHeight * gridY) / 2;
+        int gridStartX = (bombW - cellWidth * gridX) / 2;
+        int gridStartY = (bombH - cellHeight * gridY) / 2;
 
         for (int row = 0; row < gridY; row++) {
             for (int col = 0; col < gridX; col++) {
@@ -110,14 +139,18 @@ public class Level {
                 canvas.drawRect(cellRect, gridPaint);
             }
         }
-        drawModules(canvas, gridStartX, gridStartY, cellWidth, cellHeight);
-
-        Paint borderPaint = new Paint();
-        borderPaint.setColor(Color.rgb(150, 150, 150));
-        borderPaint.setStyle(Paint.Style.STROKE);
-        borderPaint.setStrokeWidth(3);
     }
-    private void drawModules(Canvas canvas, int gridStartX, int gridStartY, int cellWidth, int cellHeight) {
+    private void drawModulesOnTop(Canvas canvas) {
+        if (bombW <= 0 || bombH <= 0) return;
+
+        int gridPadding = 40;
+        int gridAreaWidth = bombW - 2 * gridPadding;
+        int gridAreaHeight = bombH - 2 * gridPadding;
+        int cellWidth = gridAreaWidth / gridX;
+        int cellHeight = gridAreaHeight / gridY;
+        int gridStartX = bombX + (bombW - cellWidth * gridX) / 2;
+        int gridStartY = bombY + (bombH - cellHeight * gridY) / 2;
+
         for (Module module : modules) {
             int row = module.getRow();
             int col = module.getCol();
@@ -139,6 +172,22 @@ public class Level {
             }
         }
     }
+    public void requestBombRedraw() {
+        bombNeedsRedraw = true;
+    }
+    public void setScreenDimensions(int screenW, int screenH) {
+        this.screenW = screenW;
+        this.screenH = screenH;
+
+        int padding = 50;
+        int availableWidth = screenW - 2 * padding;
+        int availableHeight = screenH - 2 * padding;
+
+        int cellWidth = availableWidth / gridX;
+        int cellHeight = availableHeight / gridY;
+        this.cellSize = Math.min(cellWidth, cellHeight);
+        calculateBombDimensions();
+    }
     private void calculateBombDimensions() {
         final float BOMB_ASPECT_RATIO = 16.0f / 9.0f;
 
@@ -159,19 +208,19 @@ public class Level {
 
         Log.d("myLog", String.format("Bomb: %dx%d at (%d,%d), Screen: %dx%d",
                 bombW, bombH, bombX, bombY, screenW, screenH));
+
+        // Сбрасываем кэш при изменении размеров
+        if (cachedBombBitmap != null) {
+            cachedBombBitmap.recycle();
+            cachedBombBitmap = null;
+        }
+        requestBombRedraw();
     }
-    public void setScreenDimensions(int screenW, int screenH) {
-        this.screenW = screenW;
-        this.screenH = screenH;
-
-        int padding = 50;
-        int availableWidth = screenW - 2 * padding;
-        int availableHeight = screenH - 2 * padding;
-
-        int cellWidth = availableWidth / gridX;
-        int cellHeight = availableHeight / gridY;
-        this.cellSize = Math.min(cellWidth, cellHeight);
-        calculateBombDimensions();
+    public void cleanup() {
+        if (cachedBombBitmap != null) {
+            cachedBombBitmap.recycle();
+            cachedBombBitmap = null;
+        }
     }
     private void initializePaints() {
         bombPaint = new Paint();
@@ -186,7 +235,7 @@ public class Level {
         gridPaint.setAntiAlias(true);
 
         moduleCellPaint = new Paint();
-        moduleCellPaint.setColor(Color.rgb(30, 30, 30)); // Темнее для контраста с модулями
+        moduleCellPaint.setColor(Color.rgb(30, 30, 30));
         moduleCellPaint.setStyle(Paint.Style.FILL);
         moduleCellPaint.setAntiAlias(true);
 
@@ -195,8 +244,42 @@ public class Level {
         borderPaint.setStyle(Paint.Style.STROKE);
         borderPaint.setStrokeWidth(5);
         borderPaint.setAntiAlias(true);
+
+        layerPaint.setStyle(Paint.Style.FILL);
+        layerPaint.setColor(Color.argb(20, 60, 60, 60));
     }
     //endregion draw
+    public boolean handleTouch(float x, float y) {
+        if (bombW <= 0 || bombH <= 0) return false;
+
+        if (x < bombX || x > bombX + bombW || y < bombY || y > bombY + bombH) {
+            return false;
+        }
+
+        int gridPadding = 40;
+        int gridAreaWidth = bombW - 2 * gridPadding;
+        int gridAreaHeight = bombH - 2 * gridPadding;
+        int cellWidth = gridAreaWidth / gridX;
+        int cellHeight = gridAreaHeight / gridY;
+        int gridStartX = bombX + (bombW - cellWidth * gridX) / 2;
+        int gridStartY = bombY + (bombH - cellHeight * gridY) / 2;
+
+        int col = (int) ((x - gridStartX) / cellWidth);
+        int row = (int) ((y - gridStartY) / cellHeight);
+
+        if (row >= 0 && row < gridY && col >= 0 && col < gridX) {
+            Module module = getModuleAt(row, col);
+            if (module != null) {
+                float moduleX = x - (gridStartX + col * cellWidth);
+                float moduleY = y - (gridStartY + row * cellHeight);
+                return module.handleTouch(moduleX, moduleY, cellWidth, cellHeight);
+            }
+        }
+
+        return false;
+    }
+
+
     //region getters
     public int getGridWidth() { return gridX; }
     public int getGridHeight() { return gridY; }
