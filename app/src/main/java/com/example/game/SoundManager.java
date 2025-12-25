@@ -20,7 +20,6 @@ public class SoundManager {
     private boolean soundsLoaded = false;
     private float volume = 1.0f;
 
-    // Идентификаторы звуков
     public static final String SOUND_TIMER_BEEP1 = "beep1";
     public static final String SOUND_TIMER_BEEP2 = "beep2";
 
@@ -75,7 +74,7 @@ public class SoundManager {
 
     public void loadSoundsFromAssets() {
         try {
-            loadSoundFromAssets(SOUND_TIMER_BEEP1, "sound/beep2.mp3");
+            loadSoundFromAssets(SOUND_TIMER_BEEP1, "sound/beep1.mp3");
 
             soundsLoaded = true;
             Log.d("SoundManager", "All sounds loaded successfully from assets");
