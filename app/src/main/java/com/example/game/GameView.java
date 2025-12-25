@@ -162,7 +162,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
             float centerX = canvas.getWidth() / 2f;
             float centerY = canvas.getHeight() / 2f - 100;
-            canvas.drawText("Победа!", centerX, centerY, gameWonTextPaint);
+            canvas.drawText("Обезврежено! Победа!", centerX, centerY, gameWonTextPaint);
             canvas.drawText("Все модули обезврежены", centerX, centerY + 120, gameWonSubTextPaint);
             canvas.drawText("Оставшееся время: " + String.valueOf(level.getTimeLeft()), centerX, centerY + 240, gameOverSubTextPaint);
 

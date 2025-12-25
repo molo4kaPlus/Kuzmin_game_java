@@ -22,6 +22,7 @@ public class Module {
     private int[][] occupancyGrid;
     private float cellSize;
 
+    
     private Paint modulePaint;
     private Paint textPaint;
     private Paint activePaint;
