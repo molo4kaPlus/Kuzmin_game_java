@@ -44,17 +44,17 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         paint.setTextSize(50);
 
         level = new Level(2, 1);
-        level.addModule("Timer",0,0,1L);
         level.addModule("WordDisplay", 0, 1, 1);
+        level.addModule("Timer",0,0,5L);
+
+        gameThread = new GameThread(getHolder(), this);
+        setFocusable(true);
+        initPaints();
 
         GameManager.init(context);
         gameManager = GameManager.getInstance();
         gameManager.setCurrentLevel(level);
         gameManager.startGame(level);
-
-        gameThread = new GameThread(getHolder(), this);
-        setFocusable(true);
-        initPaints();
     }
     @Override
     public boolean onTouchEvent(MotionEvent event) {

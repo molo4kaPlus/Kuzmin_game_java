@@ -371,4 +371,7 @@ public class ModuleTimer extends Module {
     public float getTimeLeft(){
         return timeLeftInMillis;
     }
+    public int getSerial(){
+        return serial;
+    }
 }

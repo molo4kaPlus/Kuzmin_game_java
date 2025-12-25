@@ -31,6 +31,10 @@ public class Module {
     private Paint objPaint;
     private List<Obj> objects;
     private static final Random random = new Random();
+    public boolean hasRJ45 = false;
+    public boolean hasPShalf = false;
+    public int batteryCount = 0;
+    public int serial = 0;
 
     public Module(int row, int col) {
         this.name = "NONE";

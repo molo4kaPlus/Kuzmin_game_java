@@ -307,5 +307,21 @@ public class Level {
         }
         return time;
     }
+    public boolean hasRJ45(){
+        if (getModuleAt(0,1).hasRJ45){
+            Log.d("myLog", "has RJ45");
+            return true;
+        }
+        return false;
+    }
+    public boolean hasPShalf(){
+        if (getModuleAt(0,1).hasPShalf || getModuleAt(0,0).hasPShalf){
+            return true;
+        }
+        return false;
+    }
+    public int getSerial(){
+        return getModuleAt(0,0).serial;
+    }
     //endregion getters
 }

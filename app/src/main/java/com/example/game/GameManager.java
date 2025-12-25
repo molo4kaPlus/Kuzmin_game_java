@@ -189,6 +189,9 @@ public class GameManager {
     private void handleBattery(ObjBattery battery, Module module) {
         battery.setSolved(true);
     }
+    private void handleWords(ModuleWords words){
+
+    }
     private void checkGameConditions() {
         if (timer != null && timer.getErrorCount() >= 3) {
             gameOver = true;
@@ -263,6 +266,19 @@ public class GameManager {
     }
     public void setCurrentLevel(Level level) {
         this.currentLevel = level;
+        initWords();
+    }
+    private void initWords(){
+        int ID;
+        if(currentLevel.hasRJ45()){
+            ID = (currentLevel.getSerial() % 10) + 1;
+            Log.d("myLog", "has RJ45");
+            ((ModuleWords)  currentLevel.getModuleAt(0,1)).setCorrectID(ID);
+        } else if (currentLevel.hasPShalf()) {
+            Log.d("myLog", "has ps");
+            ID = (currentLevel.getSerial() % 10) + 1;
+            ((ModuleWords)  currentLevel.getModuleAt(0,1)).setCorrectID(ID);
+        }
     }
     public void setGameEventListener(GameEventListener listener) {
         this.gameEventListener = listener;
@@ -288,6 +304,7 @@ public class GameManager {
                     ((ModuleWords) module).reset();
                     ((ModuleWords) module).clearObjects();
                     ((ModuleWords) module).addRandomObjects();
+                    initWords();
                 }
 
                 for (Obj obj : module.getObjects()) {

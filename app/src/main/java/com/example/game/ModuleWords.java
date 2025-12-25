@@ -30,6 +30,7 @@ public class ModuleWords extends Module {
             {"FLASH", "GRIND", "HASTE", "INBOX", "JUDGE", "KNEEL", "LODGE", "MIDST", "NOTCH", "ORBIT"},
             {"PLUME", "QUEST", "ROAST", "SWIFT", "TROOP", "USHER", "VERGE", "WHARF", "YARNS", "ZILCH"}};
     private String[] wordList;
+    private String[] unsortWordList;
     private String word;
     private int currentWordIndex = 0;
     private boolean isProcessingTouch = false;
@@ -198,7 +199,9 @@ public class ModuleWords extends Module {
         } else if (submitButtonRectTemp.contains(x, y)) {
             isProcessingTouch = true;
             Log.d("myLog", "SUBMIT pressed with word: " + displayWord);
-            // Здесь потом будет логика проверки ответа
+            if (ID == currentWordIndex){
+                isSolved = true;
+            }
             handled = true;
         }
 
@@ -220,7 +223,10 @@ public class ModuleWords extends Module {
 
         if (random.nextBoolean()) {
             int row = random.nextInt(wordmas.length);
-            return wordmas[row].clone();
+            String[] result = wordmas[row].clone();
+            unsortWordList = result;
+            shuffleArray(result);
+            return result;
         } else {
             int col = random.nextInt(wordmas[0].length);
             String[] result = new String[wordmas.length];
@@ -228,6 +234,7 @@ public class ModuleWords extends Module {
             for (int i = 0; i < wordmas.length; i++) {
                 result[i] = wordmas[i][col];
             }
+            unsortWordList = result;
             shuffleArray(result);
             return result;
         }
@@ -259,6 +266,11 @@ public class ModuleWords extends Module {
         this.displayWord = word.toUpperCase();
     }
     public void setCorrectID(int id){
-        this.ID = id;
+        for (int i = 0; i < wordmas.length; i++) {
+            if (wordList[ID] == unsortWordList[i]){
+                this.ID = i;
+            }
+            Log.d("myLog", "the word is: " + wordList[ID]);
+        }
     }
 }
