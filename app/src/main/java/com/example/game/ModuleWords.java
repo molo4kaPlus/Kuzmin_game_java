@@ -7,6 +7,8 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.util.Log;
 
+import java.util.Arrays;
+
 public class ModuleWords extends Module {
     private Paint displayPaint;
     private Paint displayBorderPaint;
@@ -225,7 +227,7 @@ public class ModuleWords extends Module {
             int row = random.nextInt(wordmas.length);
             String[] result = wordmas[row].clone();
             unsortWordList = result;
-            shuffleArray(result);
+            //shuffleArray(result);
             return result;
         } else {
             int col = random.nextInt(wordmas[0].length);
@@ -235,7 +237,7 @@ public class ModuleWords extends Module {
                 result[i] = wordmas[i][col];
             }
             unsortWordList = result;
-            shuffleArray(result);
+            //shuffleArray(result);
             return result;
         }
     }
@@ -267,11 +269,7 @@ public class ModuleWords extends Module {
         this.displayWord = word.toUpperCase();
     }
     public void setCorrectID(int id){
-        for (int i = 0; i < wordmas.length; i++) {
-            if (wordList[ID] == unsortWordList[i]){
-                this.ID = i;
-            }
-            //Log.d("myLog", "the word is: " + wordList[ID]);
-        }
+        this.ID = id;
+        Log.d("myLog", "the word is: " + unsortWordList[ID]);
     }
 }

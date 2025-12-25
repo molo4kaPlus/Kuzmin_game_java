@@ -273,16 +273,8 @@ public class GameManager {
     }
     private void initWords(){
         int ID;
-        if(currentLevel.hasRJ45()){
-            ID = (currentLevel.getSerial() % 10) - 1;
-            ((ModuleWords)  currentLevel.getModuleAt(0,1)).setCorrectID(ID);
-        } else if (currentLevel.hasPShalf()) {
-            ID = (currentLevel.getSerial() % 10);
-            ((ModuleWords)  currentLevel.getModuleAt(0,1)).setCorrectID(ID);
-        }
-        else {
-
-        }
+        ID = currentLevel.getSerial() % 10;
+        ((ModuleWords)  currentLevel.getModuleAt(0,1)).setCorrectID(ID);
     }
     public void setGameEventListener(GameEventListener listener) {
         this.gameEventListener = listener;

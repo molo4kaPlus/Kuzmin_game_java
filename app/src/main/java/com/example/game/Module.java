@@ -89,7 +89,6 @@ public class Module {
         for (Obj obj : objects) {
             if (obj instanceof ObjPSHalf) {
                 hasPShalf = true;
-                break;
             }
         }
         // Добавляем порт PS/2 с вероятностью 50%, если его еще нет и есть свободные клетки
@@ -105,7 +104,6 @@ public class Module {
         for (Obj obj : objects) {
             if (obj instanceof ObjRJ45) {
                 hasRJ45 = true;
-                break;
             }
         }
         if (!hasRJ45 && freeCells.size() >= 1 && random.nextBoolean()) {
@@ -452,6 +450,9 @@ public class Module {
         for (Obj obj : objects){
             if (!obj.solved) { return false; }
         }
+        return true;
+    }
+    public boolean hasRJ45(){
         return true;
     }
 }

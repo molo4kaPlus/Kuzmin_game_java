@@ -309,7 +309,7 @@ public class Level {
     }
     public boolean hasRJ45(){
         for (Module module : modules){
-            if(module.hasRJ45){
+            if(module.hasRJ45()){
                 return true;
             }
         }
@@ -324,7 +324,6 @@ public class Level {
         return false;
     }
     public int getSerial(){
-        Log.d("myLog", Integer.toString(getModuleAt(0,0).serial));
         return getModuleAt(0,0).serial;
     }
     //endregion getters
