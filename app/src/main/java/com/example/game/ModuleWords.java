@@ -49,12 +49,12 @@ public class ModuleWords extends Module {
         this.ID = correctID;
         this.setName("WordDisplay");
         initializePaints();
-        setCellOccupied(3,3,true);
-        setCellOccupied(3,0,true);
-        setCellOccupied(3,2,true);
-        setCellOccupied(2,2,true);
-        setCellOccupied(3,1,true);
-        setCellOccupied(2,1,true);
+//        setCellOccupied(3,3,true);
+//        setCellOccupied(3,0,true);
+//        setCellOccupied(3,2,true);
+//        setCellOccupied(2,2,true);
+//        setCellOccupied(3,1,true);
+//        setCellOccupied(2,1,true);
         nextButtonRect = new RectF();
         submitButtonRect = new RectF();
         wordList = getRandomLine();
@@ -116,61 +116,61 @@ public class ModuleWords extends Module {
     public void draw(Canvas canvas, RectF bounds) {
         super.draw(canvas, bounds);
 
-        if (canvas == null || bounds == null) return;
-
-        float displayWidth = bounds.width() * 0.45f;
-        float displayHeight = bounds.height() * 0.2f;
-        float displayLeft = bounds.centerX() - displayWidth / 2;
-        float displayTop = bounds.top + bounds.height() * 0.65f;
-
-        RectF displayRect = new RectF(displayLeft, displayTop, displayLeft + displayWidth, displayTop + displayHeight);
-        canvas.drawRoundRect(displayRect, 10, 10, displayPaint);
-        canvas.drawRoundRect(displayRect, 10, 10, displayBorderPaint);
-
-        float textX = displayRect.centerX();
-        float textY = displayRect.centerY() - (wordPaint.descent() + wordPaint.ascent()) / 2;
-        canvas.drawText(displayWord, textX, textY, wordPaint);
-
-        // Кнопки под дисплеем
-        float buttonWidth = bounds.width() * 0.3f;
-        float buttonHeight = bounds.height() * 0.1f;
-        float buttonSpacing = bounds.width() * 0.3f;
-
-        float buttonsTop = bounds.bottom - bounds.height() * 0.13f;
-
-        float nextLeft = bounds.centerX() - buttonWidth - buttonSpacing / 2;
-        float submitLeft = bounds.centerX() + buttonSpacing / 2;
-
-        nextButtonRect.set(nextLeft, buttonsTop, nextLeft + buttonWidth, buttonsTop + buttonHeight);
-        submitButtonRect.set(submitLeft, buttonsTop, submitLeft + buttonWidth, buttonsTop + buttonHeight);
-
-        // Рисуем NEXT
-        canvas.drawRoundRect(nextButtonRect, 15, 15, buttonPaint);
-        canvas.drawRoundRect(nextButtonRect, 15, 15, buttonBorderPaint);
-        float nextTextY = nextButtonRect.centerY() - (buttonTextPaint.descent() + buttonTextPaint.ascent()) / 2;
-        canvas.drawText("NEXT", nextButtonRect.centerX(), nextTextY, buttonTextPaint);
-
-        // Рисуем SUBMIT
-        canvas.drawRoundRect(submitButtonRect, 15, 15, buttonPaint);
-        canvas.drawRoundRect(submitButtonRect, 15, 15, buttonBorderPaint);
-        float submitTextY = submitButtonRect.centerY() - (buttonTextPaint.descent() + buttonTextPaint.ascent()) / 2;
-        canvas.drawText("SUBMIT", submitButtonRect.centerX(), submitTextY, buttonTextPaint);
-
-        float indicatorRadius = bounds.width() * 0.06f;
-        float indicatorX = bounds.centerX();
-        float indicatorY = buttonsTop + buttonHeight / 2;
-
-        if (isSolved) {
-            // Зеленый, если решено
-            indicatorPaint.setColor(Color.rgb(0, 255, 0)); // Яркий зеленый
-        } else {
-            // Тусклый оранжевый, если не решено
-            indicatorPaint.setColor(Color.rgb(255, 165, 50)); // Оранжевый с уменьшенной яркостью
-        }
-
-        // Рисуем индикатор
-        canvas.drawCircle(indicatorX, indicatorY, indicatorRadius, indicatorBorderPaint);
-        canvas.drawCircle(indicatorX, indicatorY, indicatorRadius - 5f, indicatorPaint);
+//        if (canvas == null || bounds == null) return;
+//
+//        float displayWidth = bounds.width() * 0.45f;
+//        float displayHeight = bounds.height() * 0.2f;
+//        float displayLeft = bounds.centerX() - displayWidth / 2;
+//        float displayTop = bounds.top + bounds.height() * 0.65f;
+//
+//        RectF displayRect = new RectF(displayLeft, displayTop, displayLeft + displayWidth, displayTop + displayHeight);
+//        canvas.drawRoundRect(displayRect, 10, 10, displayPaint);
+//        canvas.drawRoundRect(displayRect, 10, 10, displayBorderPaint);
+//
+//        float textX = displayRect.centerX();
+//        float textY = displayRect.centerY() - (wordPaint.descent() + wordPaint.ascent()) / 2;
+//        canvas.drawText(displayWord, textX, textY, wordPaint);
+//
+//        // Кнопки под дисплеем
+//        float buttonWidth = bounds.width() * 0.3f;
+//        float buttonHeight = bounds.height() * 0.1f;
+//        float buttonSpacing = bounds.width() * 0.3f;
+//
+//        float buttonsTop = bounds.bottom - bounds.height() * 0.13f;
+//
+//        float nextLeft = bounds.centerX() - buttonWidth - buttonSpacing / 2;
+//        float submitLeft = bounds.centerX() + buttonSpacing / 2;
+//
+//        nextButtonRect.set(nextLeft, buttonsTop, nextLeft + buttonWidth, buttonsTop + buttonHeight);
+//        submitButtonRect.set(submitLeft, buttonsTop, submitLeft + buttonWidth, buttonsTop + buttonHeight);
+//
+//        // Рисуем NEXT
+//        canvas.drawRoundRect(nextButtonRect, 15, 15, buttonPaint);
+//        canvas.drawRoundRect(nextButtonRect, 15, 15, buttonBorderPaint);
+//        float nextTextY = nextButtonRect.centerY() - (buttonTextPaint.descent() + buttonTextPaint.ascent()) / 2;
+//        canvas.drawText("NEXT", nextButtonRect.centerX(), nextTextY, buttonTextPaint);
+//
+//        // Рисуем SUBMIT
+//        canvas.drawRoundRect(submitButtonRect, 15, 15, buttonPaint);
+//        canvas.drawRoundRect(submitButtonRect, 15, 15, buttonBorderPaint);
+//        float submitTextY = submitButtonRect.centerY() - (buttonTextPaint.descent() + buttonTextPaint.ascent()) / 2;
+//        canvas.drawText("SUBMIT", submitButtonRect.centerX(), submitTextY, buttonTextPaint);
+//
+//        float indicatorRadius = bounds.width() * 0.06f;
+//        float indicatorX = bounds.centerX();
+//        float indicatorY = buttonsTop + buttonHeight / 2;
+//
+//        if (isSolved) {
+//            // Зеленый, если решено
+//            indicatorPaint.setColor(Color.rgb(0, 255, 0)); // Яркий зеленый
+//        } else {
+//            // Тусклый оранжевый, если не решено
+//            indicatorPaint.setColor(Color.rgb(255, 165, 50)); // Оранжевый с уменьшенной яркостью
+//        }
+//
+//        // Рисуем индикатор
+//        canvas.drawCircle(indicatorX, indicatorY, indicatorRadius, indicatorBorderPaint);
+//        canvas.drawCircle(indicatorX, indicatorY, indicatorRadius - 5f, indicatorPaint);
     }
 
     @Override
@@ -201,8 +201,12 @@ public class ModuleWords extends Module {
         } else if (submitButtonRectTemp.contains(x, y)) {
             isProcessingTouch = true;
             Log.d("myLog", "SUBMIT pressed with word: " + displayWord);
+
             if (ID == currentWordIndex){
                 isSolved = true;
+            }
+            else {
+
             }
             handled = true;
         }
@@ -254,7 +258,6 @@ public class ModuleWords extends Module {
     @Override
     public void update() {
         super.update();
-
     }
     @Override
     public boolean isSolved() {

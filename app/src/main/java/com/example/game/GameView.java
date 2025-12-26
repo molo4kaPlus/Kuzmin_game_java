@@ -330,6 +330,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         gameOver = false;
         this.gameWon = false;
         restartButtonPressed = false;
+        SoundManager.getInstance(getContext()).release();
+        SoundManager.init(getContext());
         gameManager.resetGame();
     }
     public void setGameWon(boolean won) {

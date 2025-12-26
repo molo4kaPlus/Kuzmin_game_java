@@ -23,6 +23,8 @@ public class SoundManager {
     public static final String SOUND_TIMER_BEEP1 = "beep1";
     public static final String SOUND_TIMER_BEEP2 = "beep2";
     public static final String SOUND_TIMER_BOOM1 = "boom1";
+    public static final String SOUND_TIMER_BOOM2 = "boom2";
+    public static final String SOUND_TIMER_ERROR = "error";
 
     private SoundManager(Context context) {
         this.context = context.getApplicationContext();
@@ -77,7 +79,9 @@ public class SoundManager {
         try {
             loadSoundFromAssets(SOUND_TIMER_BEEP1, "sound/beep1.mp3");
 
-            loadSoundFromAssets(SOUND_TIMER_BOOM1, "sound/BoomSound.mp3");
+            loadSoundFromAssets(SOUND_TIMER_BOOM1, "sound/boom.mp3");
+            loadSoundFromAssets(SOUND_TIMER_BOOM2, "sound/boom.mp3");
+            loadSoundFromAssets(SOUND_TIMER_ERROR, "sound/error.mp3");
 
 
             soundsLoaded = true;

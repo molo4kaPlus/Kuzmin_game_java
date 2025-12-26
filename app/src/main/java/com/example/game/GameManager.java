@@ -217,10 +217,10 @@ public class GameManager {
         battery.setSolved(true);
     }
     private void handleWords(ModuleWords words){
-
     }
     private void checkGameConditions() {
         if (timer != null && timer.getErrorCount() >= 3) {
+            SoundManager.getInstance().playSound(SoundManager.SOUND_TIMER_BOOM1, 1.0f);
             gameOver = true;
             if (gameEventListener != null) {
                 gameEventListener.onGameOver();
@@ -312,6 +312,7 @@ public class GameManager {
         lives = 3;
         gameOver = false;
         gamePaused = false;
+
         if (currentLevel != null) {
             // Reset all modules
             for (Module module : currentLevel.getModules()) {

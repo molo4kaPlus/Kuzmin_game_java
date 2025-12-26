@@ -41,7 +41,7 @@ public class ModuleTimer extends Module {
     public ModuleTimer(int row, int col, long minutes) {
         super(row, col);
         this.setName("Timer");
-        this.totalTimeMillis = minutes * 60 * 1000 / 2;
+        this.totalTimeMillis = minutes * 60 * 1000;
         this.timeLeftInMillis = totalTimeMillis;
         this.isRunning = false;
         this.errorCount = 0;
@@ -142,16 +142,16 @@ public class ModuleTimer extends Module {
                     lastDisplayedSeconds = secondsLeft;
                     updateTimeChars();
                 }
-                if (soundEnabled && secondsLeft > 0 && secondsLeft <= 150) {
+                if (soundEnabled && secondsLeft > 0) {
                     playBeepSound(secondsLeft);
                 }
-                if (soundEnabled && secondsLeft == 0)
+                if (soundEnabled && secondsLeft <= 0)
                 {
                     playBoomSound(secondsLeft);
-                    }
-//                else if (soundEnabled && ) {  // бипка пердежа под луз
+                }
+//              else if (soundEnabled && ) {  // бипка пердежа под луз
 //
-//                    }
+//              }
 
             }
 
@@ -174,7 +174,9 @@ public class ModuleTimer extends Module {
         isRunning = true;
         setActive(true);
         clearObjects();
-        timeLeftInMillis = 1 * 60 * 1000;
+        timeLeftInMillis = 5 * 60 * 1000;
+        soundManager = SoundManager.getInstance();
+        soundEnabled = true;
         countDownTimer = new CountDownTimer(timeLeftInMillis, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
@@ -185,7 +187,7 @@ public class ModuleTimer extends Module {
                     lastDisplayedSeconds = secondsLeft;
                     updateTimeChars();
                 }
-                if (soundEnabled && secondsLeft > 0 && secondsLeft <= 60) {
+                if (soundEnabled) {
                     playBeepSound(secondsLeft);
                 }
             }
@@ -347,25 +349,35 @@ public class ModuleTimer extends Module {
         if (soundManager != null && soundEnabled) {
             long currentTime = System.currentTimeMillis();
 
-            if (secondsLeft > 0 && secondsLeft <= 60) {
+            if (secondsLeft > 0) {
                 if (currentTime - lastBeepTime >= BEEP_INTERVAL) {
                     soundManager.playSound(SoundManager.SOUND_TIMER_BEEP1, 1.0f);
                     lastBeepTime = currentTime;
                     Log.d("myLog", "Beep at: " + secondsLeft + "s");
                 }
             } else if (secondsLeft == 0) {
-                soundManager.playSound(SoundManager.SOUND_TIMER_BEEP1, 1.0f);
-
+                soundManager.playSound(SoundManager.SOUND_TIMER_BOOM2, 1.0f);
             }
         }
     }
-
+    public void playBoomSound2() {
+        soundManager.playSound(SoundManager.SOUND_TIMER_BOOM2, 1.0f);
+    }
     private void playBoomSound(long secondsLeft) {
         if (soundManager != null && soundEnabled) {
             long currentTime = System.currentTimeMillis();
 
             if (secondsLeft == 0) {
                 soundManager.playSound(SoundManager.SOUND_TIMER_BOOM1, 1.0f);
+            }
+        }
+    }
+    private void playErrorSound(long secondsLeft) {
+        if (soundManager != null && soundEnabled) {
+            long currentTime = System.currentTimeMillis();
+
+            if (secondsLeft / 1000 > 1) {
+                soundManager.playSound(SoundManager.SOUND_TIMER_ERROR, 0.4f);
             }
         }
     }
@@ -378,6 +390,7 @@ public class ModuleTimer extends Module {
     public void addError() {
         if (errorCount < MAX_ERRORS) {
             errorCount++;
+            playErrorSound(timeLeftInMillis);
             Log.d("myLog", "Timer error added. Total errors: " + errorCount);
         }
     }
